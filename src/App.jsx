@@ -6,7 +6,6 @@ import awsExports from "./amplify_outputs.json";
 import "./App.css";
 
 Amplify.configure(awsExports);
-
 const client = generateClient();
 
 function App() {
@@ -14,12 +13,10 @@ function App() {
   const [noteData, setNoteData] = useState({ name: "", description: "", image: null });
   const [loading, setLoading] = useState(true);
 
-  // Fetch notes and resolve image URLs
   async function fetchNotes() {
     setLoading(true);
     try {
       const list = await client.Note.list();
-
       const notesWithUrls = await Promise.all(
         list.items.map(async (note) => {
           if (note.image) {
@@ -29,7 +26,6 @@ function App() {
           return note;
         })
       );
-
       setNotes(notesWithUrls);
     } catch (error) {
       console.error("Error fetching notes:", error);
@@ -38,22 +34,18 @@ function App() {
     }
   }
 
-  // Create a new note
   async function createNote() {
     try {
       let imageKey = null;
       if (noteData.image) {
-        const image = noteData.image;
-        imageKey = `media/${image.name}`;
-        await client.storage.put(imageKey, image);
+        imageKey = `media/${noteData.image.name}`;
+        await client.storage.put(imageKey, noteData.image);
       }
-
       await client.Note.create({
         name: noteData.name,
         description: noteData.description,
         image: imageKey,
       });
-
       setNoteData({ name: "", description: "", image: null });
       fetchNotes();
     } catch (error) {
@@ -61,7 +53,6 @@ function App() {
     }
   }
 
-  // Delete a note
   async function deleteNote(id) {
     try {
       await client.Note.delete(id);
@@ -93,10 +84,7 @@ function App() {
               value={noteData.description}
               onChange={(e) => setNoteData({ ...noteData, description: e.target.value })}
             />
-            <input
-              type="file"
-              onChange={(e) => setNoteData({ ...noteData, image: e.target.files[0] })}
-            />
+            <input type="file" onChange={(e) => setNoteData({ ...noteData, image: e.target.files[0] })} />
             <button onClick={createNote}>Create Note</button>
           </div>
 
@@ -108,9 +96,7 @@ function App() {
                 <div key={note.id} className="card">
                   <h3>{note.name}</h3>
                   <p>{note.description}</p>
-                  {note.imageUrl && (
-                    <img src={note.imageUrl} alt={note.name} style={{ maxWidth: "200px" }} />
-                  )}
+                  {note.imageUrl && <img src={note.imageUrl} alt={note.name} style={{ maxWidth: "200px" }} />}
                   <button onClick={() => deleteNote(note.id)}>Delete</button>
                 </div>
               ))}
